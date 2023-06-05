@@ -14,6 +14,16 @@ import sqlite3
 import json
 
 
+def delete_db():
+    """Function to delete existing database"""
+    try:
+        os.system('rm Investor.db')
+    except:
+        print("An error occurred while deleting older db")
+
+# Deleting db
+delete_db()
+
 # Read both Stocks and Bonds files from the csv with Exception handling
 
 def read_file(file_path):

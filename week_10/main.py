@@ -1,18 +1,3 @@
-"""
-Stock Data Analysis and Visualization
-Author: Pooja Kamble
-Date: June 3, 2023
-Description: This program reads stock data from a SQLite database, performs analysis and visualization, and saves the results as HTML files.
-
-Dependencies:
-- module1
-- pandas
-- numpy
-- sqlite3
-- plotly.graph_objects
-- plotly.express
-"""
-
 import module1
 import pandas as pd
 import numpy as np
@@ -22,6 +7,7 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 from mplfinance.original_flavor import candlestick_ohlc
 import matplotlib.dates as mpl_dates
+import matplotlib.colors as mcolors
 
 # Function to read tables from the database
 def read_tables_from_db(table):
@@ -35,6 +21,9 @@ def read_tables_from_db(table):
 
 # Read the 'stocks' table from the database into a DataFrame
 df_stocks = read_tables_from_db('stocks')
+print("*"*120)
+print(df_stocks)
+print("*"*120)
 df_stocks['NO_SHARES'] = df_stocks['NO_SHARES'].astype('int')
 
 # Read the 'AllStocks' table from the database into a DataFrame
@@ -63,7 +52,7 @@ def get_joint_df(df_allstocks: pd.DataFrame, df_stocks: pd.DataFrame):
 # Call the function to get the joined DataFrame
 df_join = get_joint_df(df_allstocks, df_stocks)
 
-#Graphing starts here
+# Graphing starts here
 
 # Define colors for the line plot
 colors = ['rgb(0, 114, 178)', 'rgb(230, 159, 0)', 'rgb(0, 158, 115)', 'rgb(204, 121, 167)', 'rgb(86, 180, 233)']
@@ -109,23 +98,41 @@ ohlc['Open'] = pd.to_numeric(ohlc['Open'], errors='coerce')
 ohlc['High'] = pd.to_numeric(ohlc['High'], errors='coerce')
 ohlc['Low'] = pd.to_numeric(ohlc['Low'], errors='coerce')
 
-#Create a new figure and axis
-fig, ax = plt.subplots()
+# Create a new figure and axis
+fig, ax = plt.subplots(figsize=(12, 6))
+
 # Plot the candlestick chart
-candlestick_ohlc(ax, ohlc.values, width=0.10, colorup='green', colordown='red')
+candlestick_ohlc(ax, ohlc.values, width=0.6, colorup='green', colordown='red')
 
 # Set x-axis labels to date format
 ax.xaxis_date()
+
 # Set axis labels and title
 ax.set_xlabel('Date')
 ax.set_ylabel('Price')
 ax.set_title('Candlestick Chart')
+
+# Format x-axis ticks
+ax.xaxis.set_major_locator(mpl_dates.AutoDateLocator())
+ax.xaxis.set_major_formatter(mpl_dates.DateFormatter('%Y-%m-%d'))
+
+# Remove gridlines
 ax.grid(False)
-ax.set_xticklabels([])
-ax.set_yticklabels([])
 
+# Calculate the price range for the y-axis
+price_range = ohlc['High'].max() - ohlc['Low'].min()
 
-# Show the plot
-plt.savefig('candlestick_chart.png', format='png')
+# Set the y-axis limits and labels
+ax.set_ylim(ohlc['Low'].min() - 0.1 * price_range, ohlc['High'].max() + 0.1 * price_range)
+ax.set_yticks(np.arange(ohlc['Low'].min(), ohlc['High'].max(), price_range / 5))
+ax.set_yticklabels([f'${round(price)}' for price in np.arange(ohlc['Low'].min(), ohlc['High'].max(), price_range / 5)])
 
+# Rotate x-axis tick labels for better readability
+plt.xticks(rotation=45, ha='right')
 
+# Adjust the plot layout to prevent overlapping of labels
+plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.15)  # Adjust the padding as needed
+
+# Save the plot as an SVG image file
+plt.savefig('candlestick_chart.png', format='png', dpi=300)
+plt.close(fig)  # Close the figure to release memory
