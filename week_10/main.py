@@ -1,3 +1,18 @@
+"""
+Stock Data Analysis and Visualization
+Author: Pooja Kamble
+Date: June 3, 2023
+Description: This program reads stock data from a SQLite database, performs analysis and visualization, and saves the results as HTML files.
+
+Dependencies:
+- module1
+- pandas
+- numpy
+- sqlite3
+- plotly.graph_objects
+- plotly.express
+"""
+
 import module1
 import pandas as pd
 import numpy as np
